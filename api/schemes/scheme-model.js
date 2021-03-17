@@ -110,7 +110,7 @@ function findById(scheme_id) { // EXERCISE B
             'steps': steps
           })
         })
-}
+};
 
 function findSteps(scheme_id) { // EXERCISE C
   /*
