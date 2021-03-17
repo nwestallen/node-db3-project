@@ -18,11 +18,11 @@ function find() { // EXERCISE A
     Return from this function the resulting dataset.
   */
   return db('schemes')
-            .leftJoin('steps', 'schemes.scheme_id', '=', 'steps.scheme_id')
-            .select('schemes.scheme_id', 'schemes.scheme_name')
-            .count('steps.step_id as number_of_steps')
-            .groupBy('schemes.scheme_id')
-            .orderBy('schemes.scheme_id');
+          .select('schemes.*')
+          .leftJoin('steps', 'schemes.scheme_id', '=', 'steps.scheme_id')
+          .count('steps.step_id as number_of_steps')
+          .groupBy('schemes.scheme_id')
+          .orderBy('schemes.scheme_id');
 }
 
 function findById(scheme_id) { // EXERCISE B
@@ -91,6 +91,25 @@ function findById(scheme_id) { // EXERCISE B
         "steps": []
       }
   */
+       return db('schemes')
+        .select('schemes.scheme_name', 'steps.*')
+        .leftJoin('steps', 'schemes.scheme_id', '=', 'steps.scheme_id')
+        .where('schemes.scheme_id', scheme_id)
+        .orderBy('steps.step_number')
+        .then(result => {
+          const steps = [];
+          if (result[0].step_id) {
+            result.forEach(step => steps.push({
+            'step_id': step.step_id,
+            'step_number': step.step_number,
+            'instructions': step.instructions
+          }));}
+          return ({
+            'scheme_id': result[0].scheme_id, 
+            'scheme_name': result[0].scheme_name,
+            'steps': steps
+          })
+        })
 }
 
 function findSteps(scheme_id) { // EXERCISE C
