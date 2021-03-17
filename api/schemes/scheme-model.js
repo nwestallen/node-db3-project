@@ -98,7 +98,9 @@ function findById(scheme_id) { // EXERCISE B
         .orderBy('steps.step_number')
         .then(result => {
           const steps = [];
-          if (result[0].step_id) {
+          if (!result[0]) {
+            return null;
+          } else if (result[0].step_id) {
             result.forEach(step => steps.push({
             'step_id': step.step_id,
             'step_number': step.step_number,
@@ -142,7 +144,11 @@ function add(scheme) { // EXERCISE D
   /*
     1D- This function creates a new scheme and resolves to _the newly created scheme_.
   */
-}
+ return db('schemes').insert(scheme)
+ .then(id => {
+   return findById(id)
+ });
+};
 
 function addStep(scheme_id, step) { // EXERCISE E
   /*
