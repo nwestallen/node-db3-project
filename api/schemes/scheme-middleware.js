@@ -57,6 +57,8 @@ const validateStep = (req, res, next) => {
     step_number < 1
     ) {
       res.status(400).json({ message: 'invalid step' });
+    } else {
+      next()
     }
 };
 

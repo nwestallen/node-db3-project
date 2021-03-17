@@ -107,7 +107,7 @@ function findById(scheme_id) { // EXERCISE B
             'instructions': step.instructions
           }));}
           return ({
-            'scheme_id': result[0].scheme_id, 
+            'scheme_id': Number(scheme_id), 
             'scheme_name': result[0].scheme_name,
             'steps': steps
           })
@@ -148,6 +148,7 @@ function add(scheme) { // EXERCISE D
   */
  return db('schemes').insert(scheme)
  .then(id => {
+   console.log(id)
    return findById(id)
  });
 };
