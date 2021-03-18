@@ -1,8 +1,10 @@
+const db = require('../../data/db-config');
+
 function find() { // EXERCISE A
   /*
     1A- Study the SQL query below running it in SQLite Studio against `data/schemes.db3`.
     What happens if we change from a LEFT join to an INNER join?
-
+    A: Rows returned go down from 7 to 6 because one scheme has no steps
       SELECT
           sc.*,
           count(st.step_id) as number_of_steps
@@ -15,6 +17,12 @@ function find() { // EXERCISE A
     2A- When you have a grasp on the query go ahead and build it in Knex.
     Return from this function the resulting dataset.
   */
+  return db('schemes')
+          .select('schemes.*')
+          .leftJoin('steps', 'schemes.scheme_id', '=', 'steps.scheme_id')
+          .count('steps.step_id as number_of_steps')
+          .groupBy('schemes.scheme_id')
+          .orderBy('schemes.scheme_id');
 }
 
 function findById(scheme_id) { // EXERCISE B
@@ -83,7 +91,28 @@ function findById(scheme_id) { // EXERCISE B
         "steps": []
       }
   */
-}
+       return db('schemes')
+        .select('schemes.scheme_name', 'steps.*')
+        .leftJoin('steps', 'schemes.scheme_id', '=', 'steps.scheme_id')
+        .where('schemes.scheme_id', scheme_id)
+        .orderBy('steps.step_number')
+        .then(result => {
+          const steps = [];
+          if (!result[0]) {
+            return null;
+          } else if (result[0].step_id) {
+            result.forEach(step => steps.push({
+            'step_id': step.step_id,
+            'step_number': step.step_number,
+            'instructions': step.instructions
+          }));}
+          return ({
+            'scheme_id': Number(scheme_id), 
+            'scheme_name': result[0].scheme_name,
+            'steps': steps
+          })
+        })
+};
 
 function findSteps(scheme_id) { // EXERCISE C
   /*
@@ -106,13 +135,22 @@ function findSteps(scheme_id) { // EXERCISE C
         }
       ]
   */
-}
+ return db('steps')
+  .select('step_id', 'step_number', 'instructions', 'scheme_name')
+  .join('schemes', 'steps.scheme_id', '=', 'schemes.scheme_id')
+  .where('steps.scheme_id', scheme_id)
+  .orderBy('steps.step_number')
+};
 
 function add(scheme) { // EXERCISE D
   /*
     1D- This function creates a new scheme and resolves to _the newly created scheme_.
   */
-}
+ return db('schemes').insert(scheme)
+ .then(id => {
+   return findById(id)
+ });
+};
 
 function addStep(scheme_id, step) { // EXERCISE E
   /*
@@ -120,7 +158,12 @@ function addStep(scheme_id, step) { // EXERCISE E
     and resolves to _all the steps_ belonging to the given `scheme_id`,
     including the newly created one.
   */
-}
+ const newStep = {...step, 'scheme_id': scheme_id}
+  return db('steps').insert(newStep)
+  .then(() => {
+    return findSteps(scheme_id)
+  }); 
+};
 
 module.exports = {
   find,
